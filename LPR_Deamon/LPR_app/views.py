@@ -16,7 +16,7 @@ import requests
 # http://91.202.207.249:8880/plateRecognized
 
 
-async def recognition():
+def recognition():
     t0 = time.time()
     img2rec = "D:/Documents/Python/License_plates/Daemon_LPR/Img/photo_2023-01-25_14-22-15.jpg"
 
@@ -224,21 +224,18 @@ async def recognition():
     t1 = time.time()
     print("Time elapsed: ", t1 - t0, "seconds")
 
-
-async def response():
-    return HttpResponse(f'Ok {datetime.now().time()}')
-
-
-async def index(request):
+def index(request): # async
     # HttpResponse(f'Ok {datetime.now().time()}')
-    # recognition()
+    recognition() # await
     # asyncio.get_event_loop().run_until_complete(recognition())
     # loop = asyncio.get_event_loop()
     # loop.run_until_complete(index())
 
-    # return HttpResponse(f'Ok {datetime.now().time()}')
-    x = asyncio.create_task(recognition())
-    y = asyncio.create_task(response())
+    # x = asyncio.create_task(recognition())
+    # y = asyncio.create_task(response()) --- пробовал вне index'а запускать
+
+    return HttpResponse(f'Ok {datetime.now().time()}')
+
 
 # asyncio.run(index("http://127.0.0.1:8000/LPR_app/"))
 
