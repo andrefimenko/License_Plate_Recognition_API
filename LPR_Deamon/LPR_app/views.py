@@ -17,9 +17,13 @@ from threading import Thread
 # http://91.202.207.249:8880/plateRecognized
 
 
-def recognition():
+def recognition(image, back_url):
+    print(image)
+    print(back_url)
     t0 = time.time()
     img2rec = "D:/Documents/Python/License_plates/Daemon_LPR/Img/photo_2023-01-25_14-22-15.jpg"
+    # load from net ##################################################
+
 
     # Set tesseract path to where the tesseract exe file is located (Edit this path accordingly based on your own settings)
     pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
@@ -146,6 +150,7 @@ def recognition():
     def send_post_request(url, value):
         myobj = {"key": value}
         x = requests.post(url, json=myobj)
+
         return x
 
     # def rotate(img_param, angle):
@@ -163,7 +168,6 @@ def recognition():
 
     enlarge_plt_display(detected_carplate_img, 1.2)
 
-    url = "https://ya.ru/"
 
     # Display extracted car license plate image
     # for yc in range(0, 25, 7):
@@ -211,7 +215,8 @@ def recognition():
                     # print(raw2candidate(raw_string_list))
                     candidate = raw2candidate(raw_string_list)
                     if candidate is not None:
-                        answer = send_post_request(url, candidate)
+                        print(candidate)
+                        answer = send_post_request(back_url, candidate)
                         # candidate_set.add(candidate) # GET , POST req(url, key); function req(url, key) {
                         # myobj = {‘key’: key}
                         # x = requests.post(url, json = myobj)
@@ -225,7 +230,8 @@ def recognition():
     t1 = time.time()
     print("Time elapsed: ", t1 - t0, "seconds")
 
-thread = Thread(target=recognition)
+
+
 
 def index(request): # async
     # HttpResponse(f'Ok {datetime.now().time()}')
@@ -236,7 +242,15 @@ def index(request): # async
     # loop.run_until_complete(index())
     # await x
     # recognition()
+    image = request.GET.get('image')
+    back_url = request.GET.get('backurl')
+    thread = Thread(target=recognition, args=(image, back_url,))
+    print("jfkllljkljlkjllk")
+
     thread.start()
+
+    print(type(request))
+    # print(request.GET.get('image'))
     # x = asyncio.create_task(recognition())
     # y = asyncio.create_task(response()) --- пробовал вне index'а запускать
 
