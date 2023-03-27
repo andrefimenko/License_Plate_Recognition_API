@@ -11,7 +11,7 @@ import json
 import time
 from PIL import Image
 import requests
-import threading
+from threading import Thread
 
 # http://127.0.0.1:8000/?image=https://powernet.com.ru/10.226.4.32_9724235.png&
 # http://91.202.207.249:8880/plateRecognized
@@ -225,6 +225,7 @@ def recognition():
     t1 = time.time()
     print("Time elapsed: ", t1 - t0, "seconds")
 
+thread = Thread(target=recognition)
 
 def index(request): # async
     # HttpResponse(f'Ok {datetime.now().time()}')
@@ -234,7 +235,8 @@ def index(request): # async
     # loop = asyncio.get_event_loop()
     # loop.run_until_complete(index())
     # await x
-    recognition()
+    # recognition()
+    thread.start()
     # x = asyncio.create_task(recognition())
     # y = asyncio.create_task(response()) --- пробовал вне index'а запускать
 
