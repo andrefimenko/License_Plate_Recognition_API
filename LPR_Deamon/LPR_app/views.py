@@ -1,57 +1,39 @@
-import asyncio
 from datetime import datetime
 from django.http import HttpResponse
-# from recognition import *
 import pytesseract
 import cv2
 import matplotlib.pyplot as plt
 import re
-import json
-# import imutils
 import time
-from PIL import Image
 import requests
 from threading import Thread
-from io import BytesIO
-
-# http://127.0.0.1:8000/?image=https://powernet.com.ru/10.226.4.32_9724235.png&
-# http://91.202.207.249:8880/plateRecognized
 
 def recognition(image, back_url):
     t0 = time.time()
-    print(image)
-    print(back_url)
-
     url = image
     response = requests.get(url)
-    img2rec = Image.open(BytesIO(response.content))
-    with open("image.jpg", "wb") as f:
+    with open("DATA/image.jpg", "wb") as f:
         f.write(response.content)
     # img2rec.show()
-
-    # img2rec = requests.get(img) # "D:/Documents/Python/License_plates/Daemon_LPR/Img/photo_2023-01-25_14-22-15.jpg"
-    # load from net ##################################################
-
 
     # Set tesseract path to where the tesseract exe file is located (Edit this path accordingly based on your own settings)
     pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
 
-    image = cv2.imread("image.jpg")
+    image = cv2.imread("DATA/image.jpg")
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image_rgb = cv2.bilateralFilter(image_rgb, 11, 15, 150)
 
     # Import Haar Cascade XML file for Russian car plate numbers
-    carplate_haar_cascade = cv2.CascadeClassifier('D:/Documents/Python/License_plates/'
-                                                  'License_Plates_Recognition/Haar_Cascade_XML'
-                                                  '/haarcascade_russian_plate_number.xml')
+    carplate_haar_cascade = cv2.CascadeClassifier(
+        'DATA\Haar_Cascade_XML/haarcascade_russian_plate_number.xml')
 
     # Function to enlarge the plt display for user to view more clearly
     def enlarge_plt_display(img, scale_factor):
         width = int(image.shape[1] * scale_factor / 100)
         height = int(image.shape[0] * scale_factor / 100)
-        dim = (width, height)
+        # dim = (width, height)
         # plt.figure(figsize=dim)
-        plt.axis('off')
+        # plt.axis('off')
         # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
     # Setup function to detect car plate
@@ -62,7 +44,7 @@ def recognition(image, back_url):
         for x, y, w, h in carplate_rects:
             cv2.rectangle(carplate_overlay, (x, y), (x + w, y + h), (255, 0, 0), 5)
         # # PAUSE SHOWING IMAGES HERE
-        cv2.imshow("Image", carplate_overlay)
+        # cv2.imshow("Image", carplate_overlay)
         # cv2.waitKey(0)
         #     # cv2.destroyAllWindows()
         return carplate_overlay
@@ -71,9 +53,7 @@ def recognition(image, back_url):
     def carplate_extract(img, y_cut=0, x_cut=0):
         carplate_rects = carplate_haar_cascade.detectMultiScale(img, scaleFactor=1.01, minNeighbors=55)
         for x, y, w, h in carplate_rects:
-            carplate_img = img[y + 6 + (y_cut // 2):y + h - 8 - y_cut, x + 10 + (x_cut):x + w - 2 - x_cut]  # [y + 12 +
-            # y_cut:y +
-            # h - 11 - y_cut, x + 9 + x_cut:x + w - 19 - x_cut]
+            carplate_img = img[y + 6 + (y_cut // 2):y + h - 8 - y_cut, x + 10 + (x_cut):x + w - 2 - x_cut]
         try:
             return carplate_img
         except Exception as e:
@@ -103,7 +83,8 @@ def recognition(image, back_url):
             print("Caught it! 4")
 
     # modes2try = [6, 7, 8, 9, 10, 11, 13]
-    modes2try = [8, 9]
+    modes2try = [7, 8, 9, 10]
+    # modes2try = [8, 9]
     # 6
     # Предположим, что это один однородный блок текста.
     # 7
@@ -122,7 +103,6 @@ def recognition(image, back_url):
 
     pattern = r'\b^[ABCEHKMOPTXY][1-9,O]{3}[ABCEHKMOPTXY]{2}[1-9,O]{2,3}\b'
 
-    response_dict = {}
 
     def raw2candidate(raw_list):
         treated = [i for i in raw_list if i != " "]  # Removing spaces
@@ -147,28 +127,18 @@ def recognition(image, back_url):
             treated[5] = "T"
 
         treated_list = "".join(treated)
-        # print(treated_list)
+
         match = re.search(pattern, treated_list)
-        # print(treated_list if match else "not recognized")
+
         if match:
             return treated_list
 
-    candidate_set = set()
 
     def send_post_request(url, value):
         myobj = {"key": value}
         x = requests.post(url, json=myobj)
 
         return x
-
-    # def rotate(img_param, angle):
-    #     height, width = img_param.shape[:2]
-    #     point = (width // 2, height // 2)
-    #
-    #     mat = cv2.getRotationMatrix2D(point, angle, 0.5)
-    #     return cv2.warpAffine(img_param, mat, (width, height))
-
-    # image_rgb = rotate(image_rgb, 18)
 
     enlarge_plt_display(image_rgb, 1.2)
 
@@ -177,9 +147,6 @@ def recognition(image, back_url):
     enlarge_plt_display(detected_carplate_img, 1.2)
 
 
-    # Display extracted car license plate image
-    # for yc in range(0, 25, 7):
-    #     for xc in range(0, 25, 7):
     for yc in range(0, lic_plate_img.shape[0] // 10, 1):
         for xc in range(0, lic_plate_img.shape[1] // 12, 2):
             carplate_extract_img = carplate_extract(image_rgb, yc, xc)
@@ -187,29 +154,17 @@ def recognition(image, back_url):
 
             try:
                 gray = cv2.cvtColor(carplate_extract_img, cv2.COLOR_BGR2GRAY)
-                cv2.imshow("1 - Grayscale Conversion", gray)
+                # cv2.imshow("1 - Grayscale Conversion", gray)
                 # Noise removal with iterative bilateral filter(removes noise while preserving edges)
                 carplate_extract_img_gray = cv2.bilateralFilter(gray, 11, 15, 15)
-                cv2.imshow("2 - Bilateral Filter", carplate_extract_img_gray)
-                # edges = cv2.Canny(carplate_extract_img_gray, 30, 200)
-                #
-                # cont = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                # cont = imutils.grab_contours(cont)
-                # cont = sorted(cont, key=cv2.contourArea, reverse=True)[:8]
-                #
-                #
-                # plt.imshow(cv2.cvtColor(edges, cv2.COLOR_BGR2RGB))
-                # plt.show()
-                # denoising the image
-                # carplate_extract_img_gray_blur = cv2.GaussianBlur(carplate_extract_img_gray,(5, 5), 0)
+                # cv2.imshow("2 - Bilateral Filter", carplate_extract_img_gray)
 
                 cv2.waitKey(1)
-                # cv2.destroyAllWindows()
 
                 # Apply median blur + grayscale
                 carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray, 5)  # Kernel size 3
                 # carplate_extract_img_gray_blur = cv2.GaussianBlur(carplate_extract_img_gray, (5, 5), 0)
-                plt.axis('off')
+                # plt.axis('off')
                 # plt.imshow(carplate_extract_img_gray_blur, cmap='gray');
             except Exception as e:
                 print("Caught it! 2")
@@ -217,62 +172,30 @@ def recognition(image, back_url):
             for i in modes2try:
                 print(f'==== Mode {i} ====')
                 raw_string = different_modes(i)
-                # print(raw_string)
+
                 try:
                     raw_string_list = list(raw_string)
-                    # print(raw2candidate(raw_string_list))
                     candidate = raw2candidate(raw_string_list)
                     if candidate is not None:
                         print(candidate)
                         answer = send_post_request(back_url, candidate)
-                        # candidate_set.add(candidate) # GET , POST req(url, key); function req(url, key) {
-                        # myobj = {‘key’: key}
-                        # x = requests.post(url, json = myobj)
+
                         print(candidate)
                         print(answer)
 
                 except Exception as e:
                     print("Caught it! 5")
 
-    print(candidate_set)
     t1 = time.time()
     print("Time elapsed: ", t1 - t0, "seconds")
 
 
+def index(request):
 
-
-def index(request): # async
-    # HttpResponse(f'Ok {datetime.now().time()}')
-    # x = asyncio.create_task(recognition()) # await
-    # y = asyncio.create_task(HttpResponse(f'Ok {datetime.now().time()}'))
-    # asyncio.get_event_loop().run_until_complete(recognition())
-    # loop = asyncio.get_event_loop()
-    # loop.run_until_complete(index())
-    # await x
-    # recognition()
     image = request.GET.get('image')
     back_url = request.GET.get('backurl')
     thread = Thread(target=recognition, args=(image, back_url,))
-    # print("jfkllljkljlkjllk")
-
     thread.start()
-
-    # print(type(request))
-    # print(request.GET.get('image'))
-    # x = asyncio.create_task(recognition())
-    # y = asyncio.create_task(response()) --- пробовал вне index'а запускать
-
-    # download_thread = threading.Thread(target=recognition())
-    # download_thread.start()
-
-    # loop = asyncio.get_event_loop()
-    # loop.create_task(recognition())
-    # loop.run_until_complete(asyncio.sleep(3))
 
     return HttpResponse(f'Ok {datetime.now().time()}')
 
-
-# asyncio.run(index("http://127.0.0.1:8000/LPR_app/"))
-
-# loop = asyncio.get_event_loop()
-# loop.run_until_complete(index())
