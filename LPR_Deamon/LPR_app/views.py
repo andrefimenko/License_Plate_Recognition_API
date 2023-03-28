@@ -24,16 +24,19 @@ def recognition(image, back_url):
 
     url = image
     response = requests.get(url)
-    img = Image.open(BytesIO(response.content))
+    img2rec = Image.open(BytesIO(response.content))
+    with open("image.jpg", "wb") as f:
+        f.write(response.content)
+    # img2rec.show()
 
-    img2rec = requests.get(img) # "D:/Documents/Python/License_plates/Daemon_LPR/Img/photo_2023-01-25_14-22-15.jpg"
+    # img2rec = requests.get(img) # "D:/Documents/Python/License_plates/Daemon_LPR/Img/photo_2023-01-25_14-22-15.jpg"
     # load from net ##################################################
 
 
     # Set tesseract path to where the tesseract exe file is located (Edit this path accordingly based on your own settings)
     pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
 
-    image = cv2.imread(img2rec)
+    image = cv2.imread("image.jpg")
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image_rgb = cv2.bilateralFilter(image_rgb, 11, 15, 150)
 
@@ -250,11 +253,11 @@ def index(request): # async
     image = request.GET.get('image')
     back_url = request.GET.get('backurl')
     thread = Thread(target=recognition, args=(image, back_url,))
-    print("jfkllljkljlkjllk")
+    # print("jfkllljkljlkjllk")
 
     thread.start()
 
-    print(type(request))
+    # print(type(request))
     # print(request.GET.get('image'))
     # x = asyncio.create_task(recognition())
     # y = asyncio.create_task(response()) --- пробовал вне index'а запускать
