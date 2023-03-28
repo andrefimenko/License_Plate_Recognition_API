@@ -12,16 +12,21 @@ import time
 from PIL import Image
 import requests
 from threading import Thread
+from io import BytesIO
 
 # http://127.0.0.1:8000/?image=https://powernet.com.ru/10.226.4.32_9724235.png&
 # http://91.202.207.249:8880/plateRecognized
 
-
 def recognition(image, back_url):
+    t0 = time.time()
     print(image)
     print(back_url)
-    t0 = time.time()
-    img2rec = "D:/Documents/Python/License_plates/Daemon_LPR/Img/photo_2023-01-25_14-22-15.jpg"
+
+    url = image
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+
+    img2rec = requests.get(img) # "D:/Documents/Python/License_plates/Daemon_LPR/Img/photo_2023-01-25_14-22-15.jpg"
     # load from net ##################################################
 
 
