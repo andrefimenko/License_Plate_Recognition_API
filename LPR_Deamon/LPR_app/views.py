@@ -10,6 +10,10 @@ from threading import Thread
 
 def recognition(image, back_url):
     t0 = time.time()
+
+    with open("DATA/log.txt", "a+") as log:
+        log.write(f"{datetime.now().isoformat()} {image} {back_url}\n")
+
     url = image
     response = requests.get(url)
     with open("DATA/image.jpg", "wb") as f:
@@ -180,8 +184,11 @@ def recognition(image, back_url):
                         print(candidate)
                         answer = send_post_request(back_url, candidate)
 
-                        print(candidate)
+                        with open("DATA/log.txt", "a+") as log:
+                            log.write(f"{datetime.now().isoformat()} {candidate}(Mode {i}) {answer}\n")
+
                         print(answer)
+
 
                 except Exception as e:
                     print("Caught it! 5")
