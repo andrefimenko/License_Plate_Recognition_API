@@ -152,6 +152,7 @@ def recognition(image, back_url):
 
 
     for yc in range(0, lic_plate_img.shape[0] // 10, 1):
+
         for xc in range(0, lic_plate_img.shape[1] // 12, 2):
             carplate_extract_img = carplate_extract(image_rgb, yc, xc)
             carplate_extract_img = enlarge_img(carplate_extract_img, 150)
@@ -174,24 +175,30 @@ def recognition(image, back_url):
                 print("Caught it! 2")
 
             for i in modes2try:
-                print(f'==== Mode {i} ====')
-                raw_string = different_modes(i)
-
-                try:
-                    raw_string_list = list(raw_string)
-                    candidate = raw2candidate(raw_string_list)
-                    if candidate is not None:
-                        print(candidate)
-                        answer = send_post_request(back_url, candidate)
-
-                        with open("DATA/log.txt", "a+") as log:
-                            log.write(f"{datetime.now().isoformat()} {candidate}(Mode {i}) {answer}\n")
-
-                        print(answer)
+                if time.time() - t0 > 60:
+                    exit()
+                else:
+                    print(f'==== Mode {i} ====')
+                    raw_string = different_modes(i)
 
 
-                except Exception as e:
-                    print("Caught it! 5")
+                    try:
+                        raw_string_list = list(raw_string)
+                        candidate = raw2candidate(raw_string_list)
+                        if candidate is not None:
+                            print(candidate)
+                            answer = send_post_request(back_url, candidate)
+
+                            with open("DATA/log.txt", "a+") as log:
+                                log.write(f"{datetime.now().isoformat()} {candidate}(Mode {i}) {answer.content}\n")
+
+
+                            print(answer.content)
+                            if answer.content == b'ok':
+                                exit()
+
+                    except Exception as e:
+                        print("Caught it! 5")
 
     t1 = time.time()
     print("Time elapsed: ", t1 - t0, "seconds")
@@ -203,6 +210,9 @@ def index(request):
     back_url = request.GET.get('backurl')
     thread = Thread(target=recognition, args=(image, back_url,))
     thread.start()
+
+    # time.sleep(5)
+    # thread.join(5)
 
     return HttpResponse(f'Ok {datetime.now().time()}')
 
