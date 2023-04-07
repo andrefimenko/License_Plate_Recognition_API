@@ -15,8 +15,7 @@ def recognition(image, back_url):
     with open("DATA/log.txt", "a+") as log:
         log.write(f"{datetime.now().isoformat()} {image} {back_url}\n")
 
-    url = image
-    response = requests.get(url)
+    response = requests.get(image)
 
     with open("DATA/image.jpg", "wb") as f:
         f.write(response.content)
