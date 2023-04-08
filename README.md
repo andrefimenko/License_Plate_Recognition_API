@@ -15,13 +15,13 @@ To __deploy__ the project you should install all the necessary
 libraries into you virtual environment usual way:
 ~~~
 pip install library_name 
-'''Except pytesseract'''
+'''Except tesseract'''
 ~~~
-Read about Pytesseract installation
+Read about PyTesseract installation
 process [here](https://pypi.org/project/pytesseract/).
 More over, after Pytesseract is installed you should
 set the path in the proper place of the 
-'LPR_Deamon/LPR_app/views.py' file where pytesseract.exe
+'LPR_Deamon/LPR_app/views.py' file where tesseract.exe
 is located on your computer. Read comments in the code.
 To __start__ the project change working directory:
 ~~~
@@ -47,9 +47,9 @@ code were chosen just for the particular conditions (camera
 mount angle, view angle, lens features, shape of the gate path
 and so on) experimentally and might not be optimal for your 
 conditions. To get the program tuned according to your 
-conditions you should first uncomment sections responsible for
-showing recognizable images. Roughly speaking this recognition
-process consists of __two stages__.
+conditions you should first uncomment sections in __views.py__
+responsible for showing recognizable images. Roughly speaking
+this recognition process consists of __two stages__.
 #### 1. Finding the license plate itself
 Play with __scaleFactor=1.01, minNeighbors=55__ parameters
 in __line 61__ (by default) of __views.py__ to achieve
@@ -63,12 +63,12 @@ discovered the best recognition results were achieved
 when the image was precisely trimmed corresponding to the plate
 symbols. If you turned on showing small license plate picture
 you will see the image is trimmed step-by-step and each time
-the program tries to recognise the number and correspond it
+the program tries to recognise the number and corresponds it
 with russian license plate number ReGex. This process does cost
 time. That is why you should choose your starting trim points
 and how many pixels will be trimmed each step. Play with
-parameters in the lines (by default) 186, 187, 192, 193 of
-views.py file.
+parameters in the lines (by default) __186, 187, 192, 193__ of
+__views.py__ file.
 ## Where users can get help with the project.
 You can read about:
 * OpenCV
