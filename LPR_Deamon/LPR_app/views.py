@@ -136,7 +136,7 @@ def recognition(image, back_url):
         Function to simplify recognition by fixing typical errors
         which were discovered experimentally and healing of accidental spaces and new-liners.
         Example: if the first symbol recognised as 1 though it should be a letter, then it is more likely the T letter.
-        Finally, if the obtained string corresponds a russian license plate it will be returned.
+        Finally, if the obtained string corresponds to a russian license plate it will be returned.
         """
         treated = [i for i in raw_list if i != " "]  # Removing spaces
         treated = [i for i in treated if i != "\n"]  # Removing "new-liners"
@@ -236,7 +236,7 @@ def recognition(image, back_url):
                                 log.write(f"{datetime.now().isoformat()} {candidate}(Mode {i}) {answer.content}\n")
 
                             print(answer.content)
-                            if answer.content == b'ok':  # Ok received, recognition stop, back to waiting
+                            if answer.content == b'ok':  # Ok received, recognition stops, back to waiting
                                 exit()
 
                     except Exception as e:
