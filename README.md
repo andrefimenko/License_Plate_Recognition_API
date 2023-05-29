@@ -39,7 +39,7 @@ Your browser will show HttpResponse immediately and recognition
 process starts.
 
 ### Tuning
-To get maximum efficiency from the program it hase to
+To get maximum efficiency from the program it has to
 be tuned the optimum way. Some adjustable values are 
 marked with comments. It is always the balance between
 speed and accuracy, so the default values you see in the
